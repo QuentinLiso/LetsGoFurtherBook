@@ -1,0 +1,8 @@
+{
+	email qliso@example.com
+}
+
+greenlight.qliso.net {
+	respond /debug/* "Not permitted" 403
+	reverse_proxy localhost:4000
+}
