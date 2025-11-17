@@ -37,12 +37,12 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 	}
 
 	type client struct {
-		limiter		*rate.Limiter
-		lastSeen	time.Time
+		limiter  *rate.Limiter
+		lastSeen time.Time
 	}
 
 	var (
-		mu	sync.Mutex
+		mu      sync.Mutex
 		clients = make(map[string]*client)
 	)
 
@@ -51,7 +51,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 			time.Sleep(time.Minute)
 			mu.Lock()
 			for ip, client := range clients {
-				if time.Since(client.lastSeen) > 3 * time.Minute {
+				if time.Since(client.lastSeen) > 3*time.Minute {
 					delete(clients, ip)
 				}
 			}
@@ -186,14 +186,14 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 }
 
 type metricsResponseWriter struct {
-	wrapped			http.ResponseWriter
-	statusCode		int
-	headerWritten	bool
+	wrapped       http.ResponseWriter
+	statusCode    int
+	headerWritten bool
 }
 
 func newMetricsResponseWriter(w http.ResponseWriter) *metricsResponseWriter {
 	return &metricsResponseWriter{
-		wrapped: w,
+		wrapped:    w,
 		statusCode: http.StatusOK,
 	}
 }
@@ -222,10 +222,10 @@ func (mw *metricsResponseWriter) Unwrap() http.ResponseWriter {
 
 func (app *application) metrics(next http.Handler) http.Handler {
 	var (
-		totalRequestReceived			= expvar.NewInt("total_requests_received")
-		totalResponsesSent				= expvar.NewInt("total_responses_sent")
-		totalProcessingTimeMicroseconds	= expvar.NewInt("total_processing_time_µs")
-		totalResponsesSentByStatus		= expvar.NewMap("total_responses_sent_by_status")
+		totalRequestReceived            = expvar.NewInt("total_requests_received")
+		totalResponsesSent              = expvar.NewInt("total_responses_sent")
+		totalProcessingTimeMicroseconds = expvar.NewInt("total_processing_time_µs")
+		totalResponsesSentByStatus      = expvar.NewMap("total_responses_sent_by_status")
 	)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -234,7 +234,7 @@ func (app *application) metrics(next http.Handler) http.Handler {
 
 		mw := newMetricsResponseWriter(w)
 		next.ServeHTTP(mw, r)
-		
+
 		totalResponsesSent.Add(1)
 		totalResponsesSentByStatus.Add(strconv.Itoa(mw.statusCode), 1)
 

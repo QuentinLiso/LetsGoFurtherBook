@@ -11,9 +11,9 @@ import (
 
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name		string `json:"name"`
-		Email		string `json:"email"`
-		Password	string `json:"password"`
+		Name     string `json:"name"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -23,9 +23,9 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	user := &data.User{
-		Name:		input.Name,
-		Email:		input.Email,
-		Activated:	false,
+		Name:      input.Name,
+		Email:     input.Email,
+		Activated: false,
 	}
 
 	err = user.Password.Set(input.Password)
@@ -59,7 +59,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	token, err := app.models.Tokens.New(user.ID, 3 * 24 * time.Hour, data.ScopeActivation)
+	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, data.ScopeActivation)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -67,8 +67,8 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 	app.background(func() {
 		data := map[string]any{
-			"activationToken":	token.Plaintext,
-			"userID": 			user.ID,
+			"activationToken": token.Plaintext,
+			"userID":          user.ID,
 		}
 		err := app.mailer.Send(user.Email, "user_welcome.tmpl.html", data)
 		if err != nil {
@@ -76,7 +76,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 	})
 
-	err = app.writeJSON(w, http.StatusAccepted, envelope{"user":user}, nil)
+	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -84,7 +84,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		TokenPlaintext	string `json:"token"`
+		TokenPlaintext string `json:"token"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -134,8 +134,3 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 	}
 }
-
-
-
-
-

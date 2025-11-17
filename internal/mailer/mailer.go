@@ -15,8 +15,8 @@ import (
 var templateFS embed.FS
 
 type Mailer struct {
-	client	*mail.Client
-	sender	string
+	client *mail.Client
+	sender string
 }
 
 func New(host string, port int, username, password, sender string) (*Mailer, error) {
@@ -26,7 +26,7 @@ func New(host string, port int, username, password, sender string) (*Mailer, err
 		mail.WithPort(port),
 		mail.WithUsername(username),
 		mail.WithPassword(password),
-		mail.WithTimeout(5 * time.Second),
+		mail.WithTimeout(5*time.Second),
 	)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (m *Mailer) Send(recipient string, templateFile string, data any) error {
 	msg.Subject(subject.String())
 	msg.SetBodyString(mail.TypeTextPlain, plainBody.String())
 	msg.AddAlternativeString(mail.TypeTextHTML, htmlBody.String())
-	
+
 	for i := 1; i <= 3; i++ {
 		err = m.client.DialAndSend(msg)
 		if err == nil {
@@ -96,5 +96,3 @@ func (m *Mailer) Send(recipient string, templateFile string, data any) error {
 
 	return err
 }
-
-

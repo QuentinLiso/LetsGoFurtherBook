@@ -21,50 +21,50 @@ import (
 const version = "1.0.0"
 
 type config struct {
-	port	int
-	env		string
-	db		struct {
-		dsn				string
-		maxOpenConns	int
-		maxIdleConns	int
-		maxIdleTime		time.Duration
+	port int
+	env  string
+	db   struct {
+		dsn          string
+		maxOpenConns int
+		maxIdleConns int
+		maxIdleTime  time.Duration
 	}
-	limiter	struct {
-		rps		float64
-		burst	int
-		enabled	bool
+	limiter struct {
+		rps     float64
+		burst   int
+		enabled bool
 	}
 	smtp struct {
-		host		string
-		port		int
-		username	string
-		password	string
-		sender		string
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
 	}
 	cors struct {
-		trustedOrigins	[]string
+		trustedOrigins []string
 	}
 }
 
 type application struct {
-	config	config
-	logger	*slog.Logger
-	models	data.Models
-	mailer	*mailer.Mailer
-	wg		sync.WaitGroup
+	config config
+	logger *slog.Logger
+	models data.Models
+	mailer *mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func main() {
 	var cfg config
-	
+
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
-	
-	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "PostreSQL DSN")
+
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "" /*os.Getenv("GREENLIGHT_DB_DSN") managed by Makefile*/, "PostreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostreSQL max idle connections")
-	flag.DurationVar(&cfg.db.maxIdleTime, "db-max-idle-time", 15 * time.Minute, "PostreSQL max connection idle time")
-	
+	flag.DurationVar(&cfg.db.maxIdleTime, "db-max-idle-time", 15*time.Minute, "PostreSQL max connection idle time")
+
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
@@ -110,12 +110,11 @@ func main() {
 	expvar.Publish("timestamp", expvar.Func(func() any {
 		return time.Now().Unix()
 	}))
-	
 
 	app := &application{
 		config: cfg,
 		logger: logger,
-		models:	data.NewModels(db),
+		models: data.NewModels(db),
 		mailer: mailer,
 	}
 

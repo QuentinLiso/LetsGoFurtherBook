@@ -13,17 +13,17 @@ import (
 
 var (
 	ErrDuplicateEmail = errors.New("duplicate email")
-	AnonymousUser = &User{}
+	AnonymousUser     = &User{}
 )
 
 type User struct {
-	ID			int64		`json:"id"`
-	CreatedAt	time.Time	`json:"created_at"`
-	Name		string		`json:"name"`
-	Email		string		`json:"email"`
-	Password	password	`json:"-"`
-	Activated	bool		`json:"activated"`
-	Version		int			`json:"-"`
+	ID        int64     `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  password  `json:"-"`
+	Activated bool      `json:"activated"`
+	Version   int       `json:"-"`
 }
 
 func (u *User) IsAnonymous() bool {
@@ -31,8 +31,8 @@ func (u *User) IsAnonymous() bool {
 }
 
 type password struct {
-	plaintext	*string
-	hash		[]byte
+	plaintext *string
+	hash      []byte
 }
 
 func (p *password) Set(plaintextPassword string) error {
@@ -87,7 +87,7 @@ func ValidateUser(v *validator.Validator, user *User) {
 }
 
 type UserModel struct {
-	DB	*sql.DB
+	DB *sql.DB
 }
 
 func (m UserModel) Insert(user *User) error {
@@ -98,7 +98,7 @@ func (m UserModel) Insert(user *User) error {
 
 	args := []any{user.Name, user.Email, user.Password.hash, user.Activated}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.CreatedAt, &user.Version)
@@ -119,10 +119,10 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 		SELECT id, created_at, name, email, password_hash, activated, version
 		FROM users
 		WHERE email = $1`
-	
+
 	var user User
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	err := m.DB.QueryRowContext(ctx, query, email).Scan(
@@ -153,7 +153,7 @@ func (m UserModel) Update(user *User) error {
 		SET name = $1, email = $2, password_hash = $3, activated = $4, version = version + 1
 		WHERE id = $5 AND version = $6
 		RETURNING version`
-	
+
 	args := []any{
 		user.Name,
 		user.Email,
@@ -163,7 +163,7 @@ func (m UserModel) Update(user *User) error {
 		user.Version,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Version)
@@ -193,9 +193,9 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 		AND tokens.scope = $2
 		AND tokens.expiry > $3`
 	args := []any{tokenHash[:], tokenScope, time.Now()}
-	
+
 	var user User
-	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
@@ -218,5 +218,3 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 
 	return &user, nil
 }
-
-
