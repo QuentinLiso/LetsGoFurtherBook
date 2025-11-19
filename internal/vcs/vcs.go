@@ -9,6 +9,6 @@ func Version() string {
 	if ok {
 		return bi.Main.Version
 	}
-	
+
 	return ""
 }
